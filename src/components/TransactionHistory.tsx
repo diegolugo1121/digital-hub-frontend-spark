@@ -1,61 +1,84 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ArrowUpRight, ArrowDownLeft, Search, Filter, RefreshCw } from "lucide-react";
-import { getTransactions, Transaction } from "@/services/api";
-import { useToast } from "@/hooks/use-toast";
+import { ArrowUpRight, ArrowDownLeft, Search, Filter } from "lucide-react";
 
-interface TransactionHistoryProps {
-  currentAccountId: number;
-}
-
-export const TransactionHistory = ({ currentAccountId }: TransactionHistoryProps) => {
+export const TransactionHistory = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
 
-  const loadTransactions = async () => {
-    setIsLoading(true);
-    try {
-      const data = await getTransactions(currentAccountId);
-      setTransactions(data);
-    } catch (error) {
-      toast({
-        title: "Error al cargar transacciones",
-        description: error instanceof Error ? error.message : "Error desconocido",
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(false);
+  // Datos simulados - estos vendrían de tu API
+  const allTransactions = [
+    {
+      id: 1,
+      type: "sent",
+      amount: -150.00,
+      account: "****5678",
+      name: "María García",
+      date: "2024-06-10",
+      time: "14:30",
+      description: "Pago de servicios"
+    },
+    {
+      id: 2,
+      type: "received",
+      amount: 500.00,
+      account: "****9012",
+      name: "Carlos López",
+      date: "2024-06-09",
+      time: "09:15",
+      description: "Transferencia de nómina"
+    },
+    {
+      id: 3,
+      type: "sent",
+      amount: -75.50,
+      account: "****3456",
+      name: "Ana Martínez",
+      date: "2024-06-08",
+      time: "16:45",
+      description: "Compra online"
+    },
+    {
+      id: 4,
+      type: "received",
+      amount: 200.00,
+      account: "****7890",
+      name: "Roberto Silva",
+      date: "2024-06-07",
+      time: "11:20",
+      description: "Reembolso"
+    },
+    {
+      id: 5,
+      type: "sent",
+      amount: -300.00,
+      account: "****2345",
+      name: "Luisa Fernández",
+      date: "2024-06-06",
+      time: "08:30",
+      description: "Alquiler"
+    },
+    {
+      id: 6,
+      type: "received",
+      amount: 1200.00,
+      account: "****6789",
+      name: "Empresa ABC",
+      date: "2024-06-05",
+      time: "10:00",
+      description: "Pago de factura"
     }
-  };
+  ];
 
-  useEffect(() => {
-    loadTransactions();
-  }, [currentAccountId]);
-
-  // Procesar transacciones para determinar tipo
-  const processedTransactions = transactions.map(transaction => ({
-    ...transaction,
-    type: transaction.fromAccountId === currentAccountId ? "sent" : "received",
-    amount: transaction.fromAccountId === currentAccountId ? -transaction.amount : transaction.amount,
-    otherAccountId: transaction.fromAccountId === currentAccountId ? transaction.toAccountId : transaction.fromAccountId,
-    formattedDate: new Date(transaction.timestamp).toLocaleDateString('es-ES'),
-    formattedTime: new Date(transaction.timestamp).toLocaleTimeString('es-ES', { 
-      hour: '2-digit', 
-      minute: '2-digit' 
-    })
-  }));
-
-  const filteredTransactions = processedTransactions.filter(transaction => {
-    const matchesSearch = transaction.otherAccountId.toString().includes(searchTerm) ||
-                         transaction.id.toString().includes(searchTerm);
+  const filteredTransactions = allTransactions.filter(transaction => {
+    const matchesSearch = transaction.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         transaction.account.includes(searchTerm);
     
     const matchesFilter = filterType === "all" || 
                          (filterType === "sent" && transaction.type === "sent") ||
@@ -64,11 +87,11 @@ export const TransactionHistory = ({ currentAccountId }: TransactionHistoryProps
     return matchesSearch && matchesFilter;
   });
 
-  const totalSent = processedTransactions
+  const totalSent = allTransactions
     .filter(t => t.type === "sent")
     .reduce((sum, t) => sum + Math.abs(t.amount), 0);
 
-  const totalReceived = processedTransactions
+  const totalReceived = allTransactions
     .filter(t => t.type === "received")
     .reduce((sum, t) => sum + t.amount, 0);
 
@@ -86,7 +109,7 @@ export const TransactionHistory = ({ currentAccountId }: TransactionHistoryProps
               ${totalSent.toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground">
-              {processedTransactions.filter(t => t.type === "sent").length} transacciones
+              {allTransactions.filter(t => t.type === "sent").length} transacciones
             </p>
           </CardContent>
         </Card>
@@ -101,7 +124,7 @@ export const TransactionHistory = ({ currentAccountId }: TransactionHistoryProps
               ${totalReceived.toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground">
-              {processedTransactions.filter(t => t.type === "received").length} transacciones
+              {allTransactions.filter(t => t.type === "received").length} transacciones
             </p>
           </CardContent>
         </Card>
@@ -118,7 +141,7 @@ export const TransactionHistory = ({ currentAccountId }: TransactionHistoryProps
               ${(totalReceived - totalSent).toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground">
-              Total de transacciones
+              Últimos 30 días
             </p>
           </CardContent>
         </Card>
@@ -127,30 +150,17 @@ export const TransactionHistory = ({ currentAccountId }: TransactionHistoryProps
       {/* Filters and Search */}
       <Card>
         <CardHeader>
-          <div className="flex justify-between items-center">
-            <div>
-              <CardTitle>Historial de Transacciones</CardTitle>
-              <CardDescription>
-                Transacciones de la cuenta {currentAccountId}
-              </CardDescription>
-            </div>
-            <Button 
-              onClick={loadTransactions}
-              disabled={isLoading}
-              variant="outline"
-              size="sm"
-            >
-              <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-              Actualizar
-            </Button>
-          </div>
+          <CardTitle>Historial de Transacciones</CardTitle>
+          <CardDescription>
+            Consulta y filtra todas tus transacciones
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col sm:flex-row gap-4 mb-6">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Buscar por ID de transacción o cuenta..."
+                placeholder="Buscar por nombre, cuenta o descripción..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -186,9 +196,9 @@ export const TransactionHistory = ({ currentAccountId }: TransactionHistoryProps
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>ID</TableHead>
                   <TableHead>Tipo</TableHead>
-                  <TableHead>Cuenta</TableHead>
+                  <TableHead>Cuenta/Nombre</TableHead>
+                  <TableHead>Descripción</TableHead>
                   <TableHead>Fecha</TableHead>
                   <TableHead className="text-right">Monto</TableHead>
                 </TableRow>
@@ -196,9 +206,6 @@ export const TransactionHistory = ({ currentAccountId }: TransactionHistoryProps
               <TableBody>
                 {filteredTransactions.map((transaction) => (
                   <TableRow key={transaction.id}>
-                    <TableCell className="font-medium">
-                      #{transaction.id}
-                    </TableCell>
                     <TableCell>
                       <div className="flex items-center">
                         <div className={`p-1 rounded-full mr-2 ${
@@ -217,15 +224,18 @@ export const TransactionHistory = ({ currentAccountId }: TransactionHistoryProps
                       </div>
                     </TableCell>
                     <TableCell>
-                      <p className="font-medium">Cuenta {transaction.otherAccountId}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {transaction.type === "sent" ? "Destino" : "Origen"}
-                      </p>
+                      <div>
+                        <p className="font-medium">{transaction.name}</p>
+                        <p className="text-sm text-muted-foreground">{transaction.account}</p>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <p className="text-sm">{transaction.description}</p>
                     </TableCell>
                     <TableCell>
                       <div>
-                        <p className="text-sm">{transaction.formattedDate}</p>
-                        <p className="text-xs text-muted-foreground">{transaction.formattedTime}</p>
+                        <p className="text-sm">{transaction.date}</p>
+                        <p className="text-xs text-muted-foreground">{transaction.time}</p>
                       </div>
                     </TableCell>
                     <TableCell className="text-right">
@@ -241,14 +251,7 @@ export const TransactionHistory = ({ currentAccountId }: TransactionHistoryProps
             </Table>
           </div>
 
-          {isLoading && (
-            <div className="text-center py-8">
-              <RefreshCw className="h-6 w-6 animate-spin mx-auto mb-2" />
-              <p className="text-muted-foreground">Cargando transacciones...</p>
-            </div>
-          )}
-
-          {!isLoading && filteredTransactions.length === 0 && (
+          {filteredTransactions.length === 0 && (
             <div className="text-center py-8 text-muted-foreground">
               <p>No se encontraron transacciones con los filtros aplicados</p>
             </div>

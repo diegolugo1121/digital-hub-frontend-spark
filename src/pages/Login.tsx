@@ -29,24 +29,24 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-banamex-light-gray to-gray-100 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-banamex-red mb-2">Digital Hub</h1>
-          <p className="text-banamex-dark-gray">Banca Digital Segura</p>
+          <h1 className="text-3xl font-bold text-primary mb-2">Digital Hub</h1>
+          <p className="text-muted-foreground">Banca Digital Segura</p>
         </div>
         
-        <Card className="shadow-lg border-0 bg-white">
-          <CardHeader className="space-y-1 bg-gradient-to-r from-banamex-blue to-blue-800 text-white rounded-t-lg">
-            <CardTitle className="text-2xl text-center text-white">Iniciar Sesión</CardTitle>
-            <CardDescription className="text-center text-blue-100">
+        <Card className="shadow-lg border-0">
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-2xl text-center">Iniciar Sesión</CardTitle>
+            <CardDescription className="text-center">
               Ingresa tus credenciales para acceder a tu cuenta
             </CardDescription>
           </CardHeader>
-          <CardContent className="p-6">
+          <CardContent>
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-banamex-dark-gray">Correo Electrónico</Label>
+                <Label htmlFor="email">Correo Electrónico</Label>
                 <Input
                   id="email"
                   type="email"
@@ -54,11 +54,10 @@ const Login = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="border-gray-300 focus:border-banamex-red focus:ring-banamex-red"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-banamex-dark-gray">Contraseña</Label>
+                <Label htmlFor="password">Contraseña</Label>
                 <Input
                   id="password"
                   type="password"
@@ -66,12 +65,11 @@ const Login = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="border-gray-300 focus:border-banamex-red focus:ring-banamex-red"
                 />
               </div>
               <Button 
                 type="submit" 
-                className="w-full bg-banamex-red hover:bg-red-700 text-white"
+                className="w-full"
                 disabled={isLoading}
               >
                 {isLoading ? "Ingresando..." : "Iniciar Sesión"}
@@ -80,7 +78,7 @@ const Login = () => {
           </CardContent>
         </Card>
         
-        <div className="text-center mt-6 text-sm text-banamex-dark-gray">
+        <div className="text-center mt-6 text-sm text-muted-foreground">
           <p>© 2024 Digital Hub Banking. Todos los derechos reservados.</p>
         </div>
       </div>
