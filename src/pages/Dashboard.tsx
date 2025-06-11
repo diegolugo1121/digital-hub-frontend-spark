@@ -1,22 +1,33 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { TransactionHistory } from "@/components/TransactionHistory";
 import { TransferForm } from "@/components/TransferForm";
-import { ArrowUpRight, ArrowDownLeft, DollarSign } from "lucide-react";
+import { ArrowUpRight, ArrowDownLeft, DollarSign, Edit } from "lucide-react";
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
+  const [isEditingAccount, setIsEditingAccount] = useState(false);
+  const [accountId, setAccountId] = useState("1");
   
-  // Datos simulados - estos vendrían de tu API
+  // Datos simulados para el saldo - esto se puede integrar con un endpoint después
   const accountData = {
     balance: 2850.75,
-    accountNumber: "****1234",
+    accountNumber: parseInt(accountId),
     name: "Juan Pérez"
   };
 
+  const handleAccountIdChange = (newAccountId: string) => {
+    if (newAccountId && !isNaN(parseInt(newAccountId))) {
+      setAccountId(newAccountId);
+      setIsEditingAccount(false);
+    }
+  };
+
+  // Datos simulados - estos vendrían de tu API
   const recentTransactions = [
     {
       id: 1,
@@ -90,6 +101,61 @@ const Dashboard = () => {
         {/* Content */}
         {activeTab === "overview" && (
           <div className="space-y-6">
+            {/* Account Selection */}
+            <Card className="border-gray-200">
+              <CardHeader>
+                <CardTitle className="text-banamex-blue">Configuración de Cuenta</CardTitle>
+                <CardDescription>
+                  Selecciona el ID de tu cuenta para ver transacciones específicas
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center space-x-4">
+                  <div className="flex-1">
+                    <Label htmlFor="accountId" className="text-banamex-dark-gray">ID de Cuenta</Label>
+                    {isEditingAccount ? (
+                      <div className="flex space-x-2 mt-2">
+                        <Input
+                          id="accountId"
+                          type="number"
+                          value={accountId}
+                          onChange={(e) => setAccountId(e.target.value)}
+                          placeholder="Ingresa ID de cuenta"
+                          className="max-w-xs"
+                        />
+                        <Button 
+                          onClick={() => handleAccountIdChange(accountId)}
+                          size="sm"
+                          className="bg-banamex-blue hover:bg-blue-700"
+                        >
+                          Guardar
+                        </Button>
+                        <Button 
+                          onClick={() => setIsEditingAccount(false)}
+                          variant="outline"
+                          size="sm"
+                        >
+                          Cancelar
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center space-x-2 mt-2">
+                        <span className="text-lg font-semibold text-banamex-blue">Cuenta: {accountId}</span>
+                        <Button
+                          onClick={() => setIsEditingAccount(true)}
+                          variant="ghost"
+                          size="sm"
+                          className="text-banamex-blue hover:bg-blue-50"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Balance Card */}
             <Card className="bg-gradient-to-r from-banamex-blue to-blue-800 text-white shadow-lg">
               <CardHeader>
@@ -101,7 +167,7 @@ const Dashboard = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-blue-100">Saldo disponible</p>
+                <p className="text-blue-100">Saldo disponible (simulado)</p>
               </CardContent>
             </Card>
 
@@ -114,7 +180,7 @@ const Dashboard = () => {
                 </CardHeader>
                 <CardContent>
                   <p className="text-xs text-gray-600">
-                    Envía dinero a otras cuentas de forma segura
+                    Envía dinero a otras cuentas usando el backend real
                   </p>
                 </CardContent>
               </Card>
@@ -126,13 +192,13 @@ const Dashboard = () => {
                 </CardHeader>
                 <CardContent>
                   <p className="text-xs text-gray-600">
-                    Consulta todas tus transacciones
+                    Consulta transacciones reales del backend
                   </p>
                 </CardContent>
               </Card>
             </div>
 
-            {/* Recent Transactions */}
+            {/* Recent Transactions - keeping the mock data for the overview */}
             <Card className="border-gray-200">
               <CardHeader>
                 <CardTitle className="text-banamex-blue">Transacciones Recientes</CardTitle>
@@ -186,8 +252,16 @@ const Dashboard = () => {
           </div>
         )}
 
-        {activeTab === "transfer" && <TransferForm currentBalance={accountData.balance} />}
-        {activeTab === "history" && <TransactionHistory />}
+        {activeTab === "transfer" && (
+          <TransferForm 
+            currentBalance={accountData.balance} 
+            currentAccountId={parseInt(accountId)}
+          />
+        )}
+        
+        {activeTab === "history" && (
+          <TransactionHistory currentAccountId={parseInt(accountId)} />
+        )}
       </div>
     </div>
   );

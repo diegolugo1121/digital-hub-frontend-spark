@@ -6,13 +6,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { AlertTriangle, Send } from "lucide-react";
+import { transferMoney } from "@/services/api";
 
 interface TransferFormProps {
   currentBalance: number;
+  currentAccountId: number;
 }
 
-export const TransferForm = ({ currentBalance }: TransferFormProps) => {
-  const [recipientAccount, setRecipientAccount] = useState("");
+export const TransferForm = ({ currentBalance, currentAccountId }: TransferFormProps) => {
+  const [toAccountId, setToAccountId] = useState("");
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -21,7 +23,7 @@ export const TransferForm = ({ currentBalance }: TransferFormProps) => {
   const minBalance = -500;
   const transferAmount = parseFloat(amount) || 0;
   const newBalance = currentBalance - transferAmount;
-  const isValidTransfer = newBalance >= minBalance && transferAmount > 0 && recipientAccount.length > 0;
+  const isValidTransfer = newBalance >= minBalance && transferAmount > 0 && toAccountId.length > 0;
 
   const handleTransfer = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,19 +39,33 @@ export const TransferForm = ({ currentBalance }: TransferFormProps) => {
 
     setIsLoading(true);
     
-    // Simulación de transferencia - aquí conectarías con tu API
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      const transferData = {
+        fromAccountId: currentAccountId,
+        toAccountId: parseInt(toAccountId),
+        amount: transferAmount
+      };
+
+      const result = await transferMoney(transferData);
+
       toast({
-        title: "Transferencia exitosa",
-        description: `Se enviaron $${transferAmount.toFixed(2)} a la cuenta ${recipientAccount}`,
+        title: "¡Transferencia exitosa!",
+        description: result,
       });
       
       // Limpiar formulario
-      setRecipientAccount("");
+      setToAccountId("");
       setAmount("");
       setDescription("");
-    }, 2000);
+    } catch (error) {
+      toast({
+        title: "Error en la transferencia",
+        description: error instanceof Error ? error.message : "Error desconocido",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -67,12 +83,23 @@ export const TransferForm = ({ currentBalance }: TransferFormProps) => {
         <CardContent className="p-6">
           <form onSubmit={handleTransfer} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="recipient" className="text-banamex-dark-gray">Cuenta Destino</Label>
+              <Label htmlFor="fromAccount" className="text-banamex-dark-gray">Cuenta Origen</Label>
               <Input
-                id="recipient"
-                placeholder="Número de cuenta del destinatario"
-                value={recipientAccount}
-                onChange={(e) => setRecipientAccount(e.target.value)}
+                id="fromAccount"
+                value={currentAccountId}
+                disabled
+                className="bg-gray-100 border-gray-300"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="toAccount" className="text-banamex-dark-gray">Cuenta Destino</Label>
+              <Input
+                id="toAccount"
+                type="number"
+                placeholder="ID de la cuenta destino"
+                value={toAccountId}
+                onChange={(e) => setToAccountId(e.target.value)}
                 required
                 className="border-gray-300 focus:border-banamex-red focus:ring-banamex-red"
               />
@@ -123,7 +150,8 @@ export const TransferForm = ({ currentBalance }: TransferFormProps) => {
             <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
               <h4 className="font-medium text-banamex-blue mb-2">Resumen de la Transferencia</h4>
               <div className="space-y-1 text-sm text-banamex-dark-gray">
-                <p>Destinatario: {recipientAccount || "No especificado"}</p>
+                <p>Cuenta origen: {currentAccountId}</p>
+                <p>Cuenta destino: {toAccountId || "No especificada"}</p>
                 <p>Monto: ${transferAmount.toFixed(2)}</p>
                 <p>Descripción: {description || "Sin descripción"}</p>
               </div>
@@ -148,7 +176,7 @@ export const TransferForm = ({ currentBalance }: TransferFormProps) => {
               <p className="font-medium mb-1">Información importante:</p>
               <ul className="space-y-1 list-disc list-inside">
                 <li>Puedes mantener un saldo negativo hasta $500</li>
-                <li>Las transferencias se procesan de forma inmediata</li>
+                <li>Las transferencias se procesan con el backend real</li>
                 <li>Verifica la cuenta destino antes de confirmar</li>
               </ul>
             </div>
