@@ -54,31 +54,32 @@ export const TransferForm = ({ currentBalance }: TransferFormProps) => {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center">
+      <Card className="border-gray-200 shadow-lg">
+        <CardHeader className="bg-gradient-to-r from-banamex-blue to-blue-800 text-white rounded-t-lg">
+          <CardTitle className="flex items-center text-white">
             <Send className="h-5 w-5 mr-2" />
             Nueva Transferencia
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-blue-100">
             Envía dinero a otras cuentas de forma segura
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-6">
           <form onSubmit={handleTransfer} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="recipient">Cuenta Destino</Label>
+              <Label htmlFor="recipient" className="text-banamex-dark-gray">Cuenta Destino</Label>
               <Input
                 id="recipient"
                 placeholder="Número de cuenta del destinatario"
                 value={recipientAccount}
                 onChange={(e) => setRecipientAccount(e.target.value)}
                 required
+                className="border-gray-300 focus:border-banamex-red focus:ring-banamex-red"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="amount">Monto</Label>
+              <Label htmlFor="amount" className="text-banamex-dark-gray">Monto</Label>
               <Input
                 id="amount"
                 type="number"
@@ -88,17 +89,18 @@ export const TransferForm = ({ currentBalance }: TransferFormProps) => {
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 required
+                className="border-gray-300 focus:border-banamex-red focus:ring-banamex-red"
               />
               {transferAmount > 0 && (
                 <div className="text-sm space-y-1">
-                  <p className="text-muted-foreground">
+                  <p className="text-gray-600">
                     Saldo actual: ${currentBalance.toFixed(2)}
                   </p>
-                  <p className={`${newBalance >= 0 ? "text-green-600" : "text-orange-600"}`}>
+                  <p className={`${newBalance >= 0 ? "text-banamex-blue" : "text-orange-600"}`}>
                     Saldo después de transferencia: ${newBalance.toFixed(2)}
                   </p>
                   {newBalance < minBalance && (
-                    <div className="flex items-center text-red-600 text-sm">
+                    <div className="flex items-center text-banamex-red text-sm">
                       <AlertTriangle className="h-4 w-4 mr-1" />
                       Esta transferencia excede tu límite permitido (${minBalance})
                     </div>
@@ -108,18 +110,19 @@ export const TransferForm = ({ currentBalance }: TransferFormProps) => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description">Descripción (Opcional)</Label>
+              <Label htmlFor="description" className="text-banamex-dark-gray">Descripción (Opcional)</Label>
               <Input
                 id="description"
                 placeholder="Concepto de la transferencia"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
+                className="border-gray-300 focus:border-banamex-red focus:ring-banamex-red"
               />
             </div>
 
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <h4 className="font-medium text-blue-900 mb-2">Resumen de la Transferencia</h4>
-              <div className="space-y-1 text-sm text-blue-800">
+            <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
+              <h4 className="font-medium text-banamex-blue mb-2">Resumen de la Transferencia</h4>
+              <div className="space-y-1 text-sm text-banamex-dark-gray">
                 <p>Destinatario: {recipientAccount || "No especificado"}</p>
                 <p>Monto: ${transferAmount.toFixed(2)}</p>
                 <p>Descripción: {description || "Sin descripción"}</p>
@@ -128,7 +131,7 @@ export const TransferForm = ({ currentBalance }: TransferFormProps) => {
 
             <Button 
               type="submit" 
-              className="w-full"
+              className="w-full bg-banamex-red hover:bg-red-700 text-white"
               disabled={!isValidTransfer || isLoading}
             >
               {isLoading ? "Procesando..." : `Transferir $${transferAmount.toFixed(2)}`}
